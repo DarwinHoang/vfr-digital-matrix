@@ -248,7 +248,7 @@ with col2:
     st.markdown("---")
     
     kpi_col1, kpi_col2, kpi_col3 = st.columns(3)
-    kpi_col1.metric(label=L["press"], value=f"{optimized_data['press']} PSI")
+    kpi_col1.metric(label=L["press"], value=f"{optimized_data['press']} MPa")
     kpi_col2.metric(label=L["speed"], value="12.5 m/min")
     kpi_col3.metric(label=L["stab"], value="98.3%")
     
