@@ -27,7 +27,7 @@ def toggle_lang():
 T = {
     "EN": {
         "title": "V.F.R Digital Parameter Matrix",
-        "btn_lang": "🇻🇳 Switch to Vietnamese",
+        "btn_lang": "🇻🇳 CHuyển sang Tiếng Việt",
         "sec_param": "PARAMETER SELECTION",
         "sec_dash": "LIVE OPTIMAL DASHBOARD",
         "scan_title": "(0) Process Scanning",
@@ -66,7 +66,7 @@ T = {
     },
     "VN": {
         "title": "Ma Trận Thông Số Kỹ Thuật Số V.F.R",
-        "btn_lang": "🇬🇧 Chuyển sang Tiếng Anh",
+        "btn_lang": "🇬🇧 Switch to English",
         "sec_param": "CHỌN THÔNG SỐ ĐẦU VÀO",
         "sec_dash": "BẢNG ĐIỀU KHIỂN TỐI ƯU (TRỰC TIẾP)",
         "scan_title": "(0) Quét Mã Quy Trình",
