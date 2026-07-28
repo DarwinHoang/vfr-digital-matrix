@@ -111,8 +111,10 @@ L = T[st.session_state.lang] # Lấy bộ từ điển hiện tại
 # ==========================================
 h1, h2, h3 = st.columns([0.6, 3.5, 1.5])
 with h1:
-    try: st.image("logo.png", width=90)
-    except: st.write("⚙️")
+    try: 
+        st.image("logo.png", width=90)
+    except: 
+        st.write("⚙️")
 with h2:
     st.title(L["title"])
 with h3:
@@ -138,14 +140,27 @@ if "sub_type_key" not in st.session_state:
 
 def get_optimized_parameters(sub_type, sub_desc, thickness, veneer_sides, veneer_thickness, glue_type, glue_spread):
     base_temp, base_time, base_press = 180, 200, 90
-    if sub_type == "BOARD" and "MDF" in sub_desc: base_temp += 5; base_press += 5
-    elif sub_type == "WOOD": base_temp += 8; base_time += 15
+    if sub_type == "BOARD" and "MDF" in sub_desc: 
+        base_temp += 5
+        base_press += 5
+    elif sub_type == "WOOD": 
+        base_temp += 8
+        base_time += 15
+        
     base_time += (int(thickness.replace("mm","")) - 15) * 5
-    if veneer_sides == "2 Sides": base_time += 25 
-    if veneer_thickness in ["0.9mm", "5mm"]: base_time += 15; base_temp += 2
-    if glue_type == "UF": base_temp += 8 
-    elif glue_type in ["EPI", "AB"]: base_temp -= 5 
-    if glue_spread > 120: base_time += (glue_spread - 120) * 0.5 
+    
+    if veneer_sides == "2 Sides": 
+        base_time += 25 
+    if veneer_thickness in ["0.9mm", "5mm"]: 
+        base_time += 15
+        base_temp += 2
+    if glue_type == "UF": 
+        base_temp += 8 
+    elif glue_type in ["EPI", "AB"]: 
+        base_temp -= 5 
+    if glue_spread > 120: 
+        base_time += (glue_spread - 120) * 0.5 
+        
     return {"temp": round(base_temp, 1), "time": int(base_time), "press": round(base_press, 1)}
 
 # ==========================================
@@ -159,7 +174,8 @@ with col1:
     # 0. Barcode Scanner
     st.markdown(f"**{L['scan_title']}**")
     bc1, bc2 = st.columns([3, 1.5])
-    with bc1: barcode = st.text_input("Barcode", placeholder=L["scan_ph"], label_visibility="collapsed")
+    with bc1: 
+        barcode = st.text_input("Barcode", placeholder=L["scan_ph"], label_visibility="collapsed")
     with bc2:
         if st.button(L["btn_load"], use_container_width=True):
             if barcode.strip() == "2COM1HP-001":
@@ -171,16 +187,20 @@ with col1:
                 st.success(L["msg_load"])
             else:
                 st.error(L["msg_err"])
+                
     st.markdown("<hr>", unsafe_allow_html=True)
     
     # 1. Substrate
     st.markdown(f"**{L['sub_title']}**")
     c1, c2 = st.columns(2)
-    with c1: sub_type = st.selectbox(L["sub_type"], list(SUBSTRATE_DATA.keys()), key="sub_type_key")
+    with c1: 
+        sub_type = st.selectbox(L["sub_type"], list(SUBSTRATE_DATA.keys()), key="sub_type_key")
     with c2:
-        if st.session_state.sub_desc_key not in SUBSTRATE_DATA[sub_type]: st.session_state.sub_desc_key = SUBSTRATE_DATA[sub_type][0]
+        if st.session_state.sub_desc_key not in SUBSTRATE_DATA[sub_type]: 
+            st.session_state.sub_desc_key = SUBSTRATE_DATA[sub_type][0]
         sub_desc = st.selectbox(L["sub_mat"], SUBSTRATE_DATA[sub_type], key="sub_desc_key")
     thickness = st.selectbox(L["sub_thick"], ["12mm", "15mm", "18mm", "20mm"], key="thickness_key")
+    
     st.markdown("<hr>", unsafe_allow_html=True)
     
     # 2. Veneer
@@ -196,8 +216,11 @@ with col1:
     veneer_sides = st.session_state.veneer_sides_key
 
     c3, c4 = st.columns(2)
-    with c3: veneer_material = st.selectbox(L["ven_mat"], ["Oak", "Walnut", "Beech", "Poplar", "Maple"], key="veneer_mat_key")
-    with c4: veneer_thickness = st.selectbox(L["ven_thick"], ["0.3mm", "0.6mm", "0.9mm", "5mm"], key="veneer_thick_key")
+    with c3: 
+        veneer_material = st.selectbox(L["ven_mat"], ["Oak", "Walnut", "Beech", "Poplar", "Maple"], key="veneer_mat_key")
+    with c4: 
+        veneer_thickness = st.selectbox(L["ven_thick"], ["0.3mm", "0.6mm", "0.9mm", "5mm"], key="veneer_thick_key")
+        
     st.markdown("<hr>", unsafe_allow_html=True)
     
     # 3. Glue
@@ -231,7 +254,7 @@ with col2:
         st.plotly_chart(fig_temp, use_container_width=True)
         st.markdown(L["temp_tgt"], unsafe_allow_html=True)
 
-with dash_col2:
+    with dash_col2:
         st.markdown(f"### {L['time_title']}")
         st.markdown(L["time_sub"])
         
