@@ -24,7 +24,20 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("⚙️ V.F.R Digital Parameter Matrix")
+# ==========================================
+# HEADER WITH V.F.R LOGO
+# ==========================================
+header_col1, header_col2 = st.columns([0.6, 5])
+
+with header_col1:
+    try:
+        st.image("logo.png", width=90)
+    except:
+        st.write("⚙️")
+
+with header_col2:
+    st.title("V.F.R Digital Parameter Matrix")
+
 st.markdown("---")
 
 # ==========================================
@@ -49,7 +62,7 @@ def get_optimized_parameters(sub_type, sub_desc, thickness, veneer_sides, veneer
         base_temp += 5
         base_press += 5
     elif sub_type == "WOOD":
-        base_temp += 8  # Solid wood requires slightly higher temp
+        base_temp += 8  
         base_time += 15
     
     thick_val = int(thickness.replace("mm",""))
@@ -93,10 +106,8 @@ with col1:
     st.markdown("**(1) Substrate Specifications**")
     c1, c2 = st.columns(2)
     with c1:
-        # First Dropdown (Type)
         sub_type = st.selectbox("Substrate Type", list(SUBSTRATE_DATA.keys()), index=1)
     with c2:
-        # Second Dropdown (Description) - Dependent on First Dropdown
         sub_desc = st.selectbox("Specific Material", SUBSTRATE_DATA[sub_type])
         
     thickness = st.selectbox("Core Thickness", ["12mm", "15mm", "18mm", "20mm"], index=2)
