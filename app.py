@@ -19,9 +19,8 @@ st.markdown("""
     .main { background-color: #0E1117; }
     h1, h2, h3, p, label { color: #FAFAFA !important; }
     div[data-testid="stMetricValue"] > div { color: #FAFAFA !important; }
-    .stSelectbox label, .stRadio label, .stSlider label { color: #FAFAFA !important; }
-    /* Make the current selection text smaller and compact */
-    .current-selection { font-size: 0.9em; color: #B0BEC5; line-height: 1.4; }
+    .stSelectbox label, .stRadio label, .stSlider label { color: #FAFAFA !important; font-weight: bold; }
+    hr { margin: 15px 0 !important; opacity: 0.3; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -29,25 +28,36 @@ st.title("⚙️ V.F.R Digital Parameter Matrix")
 st.markdown("---")
 
 # ==========================================
-# 2. SIMULATED DOE MODEL LOGIC
+# 2. DATA DICTIONARY (From User's Excel)
 # ==========================================
-def get_optimized_parameters(substrate, thickness, veneer_sides, veneer_material, veneer_thickness, glue_type, glue_spread):
+SUBSTRATE_DATA = {
+    "WOOD": ["ACACIA", "ASH", "BEECH", "OAK", "POPLAR", "TEAK", "EUCALYPTUS"],
+    "BOARD": ["PLYWOOD - SHANGWOOD", "LVL PLYWOOD - SHANGWOOD", "MDF - DONGWHA"]
+}
+
+# ==========================================
+# 3. SIMULATED DOE MODEL LOGIC
+# ==========================================
+def get_optimized_parameters(sub_type, sub_desc, thickness, veneer_sides, veneer_material, veneer_thickness, glue_type, glue_spread):
     """
     Simulates a DOE model response based on selections.
     """
     base_temp, base_time, base_press = 180, 200, 90
     
-    # 1. Substrate & Thickness
-    if substrate == "MDF":
+    # 1. Substrate & Thickness Adjustments
+    if sub_type == "BOARD" and "MDF" in sub_desc:
         base_temp += 5
         base_press += 5
+    elif sub_type == "WOOD":
+        base_temp += 8  # Solid wood requires slightly higher temp
+        base_time += 15
     
     thick_val = int(thickness.replace("mm",""))
     base_time += (thick_val - 15) * 5
 
     # 2. Veneer Config
     if veneer_sides == "2 Sides":
-        base_time += 25 # Need more time to cure both sides
+        base_time += 25 
     
     if veneer_thickness == "0.6mm":
         base_time += 5
@@ -57,12 +67,12 @@ def get_optimized_parameters(substrate, thickness, veneer_sides, veneer_material
 
     # 3. Glue Specs
     if glue_type == "UF":
-        base_temp += 8 # UF requires higher temp to cure than PVAc
+        base_temp += 8 
     elif glue_type == "EPI":
-        base_temp -= 5 # EPI can cure at slightly lower temp
+        base_temp -= 5 
         
     if glue_spread > 120:
-        base_time += (glue_spread - 120) * 0.5 # More glue = more moisture to evaporate
+        base_time += (glue_spread - 120) * 0.5 
 
     return {
         "temp": round(base_temp, 1),
@@ -71,23 +81,29 @@ def get_optimized_parameters(substrate, thickness, veneer_sides, veneer_material
     }
 
 # ==========================================
-# 3. LAYOUT DESIGN: Input & Output
+# 4. LAYOUT DESIGN: Input & Output
 # ==========================================
-col1, col2 = st.columns([1.2, 2.8])
+col1, col2 = st.columns([1.3, 2.7])
 
 # COLUMN 1: PARAMETER SELECTION
 with col1:
     st.subheader("PARAMETER SELECTION")
     
-    # --- Base Material ---
+    # --- Substrate Specs ---
+    st.markdown("**(1) Substrate Specifications**")
     c1, c2 = st.columns(2)
     with c1:
-        substrate = st.selectbox("Substrate Material", ["Plywood", "MDF"])
+        # First Dropdown (Type)
+        sub_type = st.selectbox("Substrate Type", list(SUBSTRATE_DATA.keys()), index=1)
     with c2:
-        thickness = st.selectbox("Core Thickness", ["12mm", "15mm", "18mm", "20mm"], index=2)
+        # Second Dropdown (Description) - Dependent on First Dropdown
+        sub_desc = st.selectbox("Specific Material", SUBSTRATE_DATA[sub_type])
+        
+    thickness = st.selectbox("Core Thickness", ["12mm", "15mm", "18mm", "20mm"], index=2)
     
     # --- Veneer Specs ---
-    st.markdown("<hr style='margin: 10px 0; opacity: 0.2'>", unsafe_allow_html=True)
+    st.markdown("<hr>", unsafe_allow_html=True)
+    st.markdown("**(2) Veneer Specifications**")
     veneer_sides = st.radio("Veneer Sides", ["1 Side", "2 Sides"], horizontal=True)
     
     c3, c4 = st.columns(2)
@@ -97,12 +113,12 @@ with col1:
         veneer_thickness = st.selectbox("Veneer Thickness", ["0.3mm", "0.6mm", "0.9mm"])
 
     # --- Glue Specs ---
-    st.markdown("<hr style='margin: 10px 0; opacity: 0.2'>", unsafe_allow_html=True)
+    st.markdown("<hr>", unsafe_allow_html=True)
+    st.markdown("**(3) Glue Specifications**")
     glue_type = st.selectbox("Glue Type", ["PVAc", "UF", "AB", "EPI"], index=1)
     glue_spread = st.slider("Glue Spread (gr/m²)", min_value=80, max_value=200, value=120, step=5)
     
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("**Configuration Status:** ✅ Ready")
     
     # Optimize Button
     optimize_clicked = st.button("Optimize Parameters", type="primary", use_container_width=True)
@@ -113,10 +129,9 @@ with col2:
     
     # Perform simulation based on new inputs
     if optimize_clicked:
-        optimized_data = get_optimized_parameters(substrate, thickness, veneer_sides, veneer_material, veneer_thickness, glue_type, glue_spread)
-        st.success(f"Parameters successfully optimized via Digital Matrix!")
+        optimized_data = get_optimized_parameters(sub_type, sub_desc, thickness, veneer_sides, veneer_material, veneer_thickness, glue_type, glue_spread)
+        st.success(f"Parameters successfully optimized for {sub_desc}!")
     else:
-        # Default placeholder values before click
         optimized_data = {"temp": 185.7, "time": 240, "press": 95.0}
 
     # Top Row: Machine Temp & Pressing Time
@@ -127,7 +142,6 @@ with col2:
         st.markdown("Selected: Press 03, Heater 1 & 2")
         st.markdown(f"<h1 style='color: #00E676; font-size: 4rem; margin: 0;'>{optimized_data['temp']} °C</h1>", unsafe_allow_html=True)
         
-        # Simulate Line Chart
         np.random.seed(42) 
         temp_data = pd.DataFrame({
             "Time": range(1, 21),
@@ -142,7 +156,6 @@ with col2:
         st.markdown("### PRESSING TIME")
         st.markdown("Line A, Station 1")
         
-        # Gauge Chart
         fig_gauge = go.Figure(go.Indicator(
             mode = "gauge+number",
             value = optimized_data['time'],
