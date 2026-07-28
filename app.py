@@ -13,13 +13,10 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS to mimic dark mode and styling
+# Chỉ giữ lại CSS chỉnh độ mờ đường kẻ và in đậm chữ
 st.markdown("""
     <style>
-    .main { background-color: #0E1117; }
-    h1, h2, h3, p, label { color: #FAFAFA !important; }
-    div[data-testid="stMetricValue"] > div { color: #FAFAFA !important; }
-    .stSelectbox label, .stRadio label, .stSlider label { color: #FAFAFA !important; font-weight: bold; }
+    .stSelectbox label, .stRadio label, .stSlider label { font-weight: bold; }
     hr { margin: 15px 0 !important; opacity: 0.3; }
     </style>
 """, unsafe_allow_html=True)
@@ -52,12 +49,8 @@ SUBSTRATE_DATA = {
 # 3. SIMULATED DOE MODEL LOGIC
 # ==========================================
 def get_optimized_parameters(sub_type, sub_desc, thickness, veneer_sides, veneer_material, veneer_thickness, glue_type, glue_spread):
-    """
-    Simulates a DOE model response based on selections.
-    """
     base_temp, base_time, base_press = 180, 200, 90
     
-    # 1. Substrate & Thickness Adjustments
     if sub_type == "BOARD" and "MDF" in sub_desc:
         base_temp += 5
         base_press += 5
@@ -68,7 +61,6 @@ def get_optimized_parameters(sub_type, sub_desc, thickness, veneer_sides, veneer
     thick_val = int(thickness.replace("mm",""))
     base_time += (thick_val - 15) * 5
 
-    # 2. Veneer Config
     if veneer_sides == "2 Sides":
         base_time += 25 
     
@@ -78,7 +70,6 @@ def get_optimized_parameters(sub_type, sub_desc, thickness, veneer_sides, veneer
         base_time += 10
         base_temp += 2
 
-    # 3. Glue Specs
     if glue_type == "UF":
         base_temp += 8 
     elif glue_type == "EPI":
@@ -102,7 +93,6 @@ col1, col2 = st.columns([1.3, 2.7])
 with col1:
     st.subheader("PARAMETER SELECTION")
     
-    # --- Substrate Specs ---
     st.markdown("**(1) Substrate Specifications**")
     c1, c2 = st.columns(2)
     with c1:
@@ -112,7 +102,6 @@ with col1:
         
     thickness = st.selectbox("Core Thickness", ["12mm", "15mm", "18mm", "20mm"], index=2)
     
-    # --- Veneer Specs ---
     st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown("**(2) Veneer Specifications**")
     veneer_sides = st.radio("Veneer Sides", ["1 Side", "2 Sides"], horizontal=True)
@@ -123,29 +112,24 @@ with col1:
     with c4:
         veneer_thickness = st.selectbox("Veneer Thickness", ["0.3mm", "0.6mm", "0.9mm"])
 
-    # --- Glue Specs ---
     st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown("**(3) Glue Specifications**")
     glue_type = st.selectbox("Glue Type", ["PVAc", "UF", "AB", "EPI"], index=1)
     glue_spread = st.slider("Glue Spread (gr/m²)", min_value=80, max_value=200, value=120, step=5)
     
     st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Optimize Button
     optimize_clicked = st.button("Optimize Parameters", type="primary", use_container_width=True)
 
 # COLUMN 2: LIVE OPTIMAL DASHBOARD
 with col2:
     st.subheader("LIVE OPTIMAL DASHBOARD")
     
-    # Perform simulation based on new inputs
     if optimize_clicked:
         optimized_data = get_optimized_parameters(sub_type, sub_desc, thickness, veneer_sides, veneer_material, veneer_thickness, glue_type, glue_spread)
         st.success(f"Parameters successfully optimized for {sub_desc}!")
     else:
         optimized_data = {"temp": 185.7, "time": 240, "press": 95.0}
 
-    # Top Row: Machine Temp & Pressing Time
     dash_col1, dash_col2 = st.columns(2)
     
     with dash_col1:
@@ -188,7 +172,6 @@ with col2:
 
     st.markdown("---")
     
-    # Bottom Row: Secondary KPIs
     kpi_col1, kpi_col2, kpi_col3 = st.columns(3)
     kpi_col1.metric(label="Pressure", value=f"{optimized_data['press']} PSI")
     kpi_col2.metric(label="Feed Speed", value="12.5 m/min")
